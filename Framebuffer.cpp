@@ -82,15 +82,6 @@ void CFramebuffer::UnInit()
     }
 }
 
-void CFramebuffer::Clear()
-{
-    if (buf == NULL || buf == MAP_FAILED || screensize <= 0)
-    {
-        return;
-    }
-    memset(buf, 0, screensize);
-}
-
 int CFramebuffer::GetWidth()
 {
     return vinfo.xres;
