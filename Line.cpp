@@ -1,85 +1,63 @@
 #include "Line.h"
+#include <cstdlib>
 
-
-VecPt CLine::ToPoints() 
-{  
+// Bresenham 直线：只用整数加减，用判别式决定下一个像素
+// 不再计算斜率，避免除法和浮点误差
+VecPt CLine::ToPoints()
+{
 	VecPt ptVec;
 
-	// 因为要计算斜率，所以先判断在x方向，起点终点是否重合
-    if(m_start.x == m_end.x){
+	int x0 = (int)m_start.x;
+	int y0 = (int)m_start.y;
+	int x1 = (int)m_end.x;
+	int y1 = (int)m_end.y;
 
-        int x = m_start.x;
-        int y = 0;
+	int dx = std::abs(x1 - x0);
+	int dy = std::abs(y1 - y0);
+	int sx = (x0 < x1) ? 1 : -1;
+	int sy = (y0 < y1) ? 1 : -1;
 
-        if (m_start.y < m_end.y)
-        {
-            for(y = m_start.y; y <= m_end.y; y++)
-            { 
-                ptVec.push_back(CPoint(x, y, m_color)); 
-            } 
-        }
-        else 
-        {
-            for(y = m_end.y; y <= m_start.y; y++)
-            {
-                ptVec.push_back(CPoint(x, y, m_color)); 
-            }
-        }
+	if (dx >= dy)
+	{
+		// 沿 x 步进。判别式 p 表示真实直线与当前像素的偏差
+		// p < 0：下一步仍用当前 y；p >= 0：y 也要跟着走一格
+		int p = 2 * dy - dx;
+		int y = y0;
+		for (int i = 0; i <= dx; ++i)
+		{
+			ptVec.push_back(CPoint(x0, y, m_color));
+			x0 += sx;
+			if (p >= 0)
+			{
+				y += sy;
+				p += 2 * dy - 2 * dx;
+			}
+			else
+			{
+				p += 2 * dy;
+			}
+		}
+	}
+	else
+	{
+		// 沿 y 步进，x、y 角色对调
+		int p = 2 * dx - dy;
+		int x = x0;
+		for (int i = 0; i <= dy; ++i)
+		{
+			ptVec.push_back(CPoint(x, y0, m_color));
+			y0 += sy;
+			if (p >= 0)
+			{
+				x += sx;
+				p += 2 * dx - 2 * dy;
+			}
+			else
+			{
+				p += 2 * dx;
+			}
+		}
+	}
 
-    }
-    else
-    {
-        // TODO 计算斜率
-        double slope =  (double) (m_end.y - m_start.y) / (m_end.x - m_start.x);
-         
-        int x = 0;
-        int y = 0;
-
-        // 哪个坐标长，就遍历哪个
-        if(abs(m_start.x - m_end.x) > abs(m_start.y - m_end.y))
-        {
-           if (m_start.x < m_end.x)
-            {
-                for(x = m_start.x; x <= m_end.x; x++)
-                {
-                    //TODO 计算y
-                    y = slope * (x - m_start.x) + m_start.y;
-                    ptVec.push_back(CPoint(x, y, m_color)); 
-                }
-            }
-            else 
-            {
-                for(x = m_end.x; x <= m_start.x; x++)
-                {
-                    //TODO 计算y
-                    y = slope * (x - m_end.x) + m_end.y;
-                    ptVec.push_back(CPoint(x, y, m_color)); 
-                }
-            } 
-        }
-        else
-        {
-            if (m_start.y < m_end.y)
-            {
-                for(y = m_start.y; y <= m_end.y; y++)
-                {
-                    //TODO 计算y
-                    x =  (y - m_start.y) / slope + m_start.x;
-                    ptVec.push_back(CPoint(x, y, m_color)); 
-                }
-            }
-            else 
-            {
-                for(y = m_end.y; y <= m_start.y; y++)
-                {
-                    //TODO 计算y
-                    x = (y - m_end.y) / slope + m_end.x;
-                    ptVec.push_back(CPoint(x, y, m_color)); 
-                }
-            } 
-        }
-        
-    }  
-
-	return ptVec; 
+	return ptVec;
 }
