@@ -20,6 +20,7 @@ public:
 	CFramebuffer();
 	~CFramebuffer();
 	int Init();
+	void Clear();
 	void DrawPoint(CPoint pt);
 	void DrawPoints(VecPt ptVec);
 	
